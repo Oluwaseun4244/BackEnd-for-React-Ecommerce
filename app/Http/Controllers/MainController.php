@@ -50,7 +50,7 @@ class MainController extends Controller
             $product["product_image3"] = $destination3;
             $product["product_image4"] = $destination4;
 
-            dd($product);
+            // dd($product);
             $save_product = Product::create($product);
             if ($save_product) {
                 dd("HAHAH");
