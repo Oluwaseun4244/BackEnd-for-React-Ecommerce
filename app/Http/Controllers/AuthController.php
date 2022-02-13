@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Validator;
 
 
@@ -17,7 +18,8 @@ class AuthController extends Controller
      *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
@@ -26,8 +28,9 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request){
-    	$validator = Validator::make($request->all(), [
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
@@ -36,7 +39,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        if (! $token = auth()->attempt($validator->validated())) {
+        if (!$token = auth()->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -53,7 +56,7 @@ class AuthController extends Controller
 
     //         $email = $request->email;
     //         $password=$request->password;
-            
+
     //         if (Auth::attempt(['email'=> $email, 'password'=>$password])){
     //             $user= User::where(['email'=>$email])->first();
     //             $token = JWTAuth::fromUser($user);
@@ -68,28 +71,41 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function register(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required',
-        ]);
+    public function register(Request $request)
+    {
 
-        // |string|confirmed|min:6
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+        if ($request->isMethod("POST")) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|between:2,100',
+                'email' => 'required|string|email|max:100|unique:users',
+                'password' => 'required',
+            ]);
+
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), 400);
+            }
+
+
+
+            $allRequest = $request->all();
+            $allRequest["password"] = Hash::make($request->password);
+            $user = User::create($allRequest);
+            return response()->json(["hey" => $allRequest]);
+            // return response()->json(["hey"=>"what?"]);
+
+
+            // $user = User::create(array_merge(
+            //             $validator->validated(),
+            //             ['password' => bcrypt($request->password)]
+            //         ));
+
+            return response()->json([
+                'message' => 'User successfully registered',
+                'user' => $user
+                // 'token' => $token
+            ], 201);
         }
-
-        $user = User::create(array_merge(
-                    $validator->validated(),
-                    ['password' => bcrypt($request->password)]
-                ));
-
-        return response()->json([
-            'message' => 'User successfully registered',
-            'user' => $user
-            // 'token' => $token
-        ], 201);
     }
 
 
@@ -98,7 +114,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout() {
+    public function logout()
+    {
         auth()->logout();
 
         return response()->json(['message' => 'User successfully signed out']);
@@ -109,7 +126,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function refresh() {
+    public function refresh()
+    {
         return $this->createNewToken(auth()->refresh());
     }
 
@@ -118,7 +136,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function userProfile() {
+    public function userProfile()
+    {
         return response()->json(auth()->user());
     }
 
@@ -129,7 +148,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function createNewToken($token){
+    protected function createNewToken($token)
+    {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
@@ -137,5 +157,4 @@ class AuthController extends Controller
             'user' => auth()->user()
         ]);
     }
-
 }
