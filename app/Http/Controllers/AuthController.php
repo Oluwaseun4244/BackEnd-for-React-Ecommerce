@@ -88,18 +88,17 @@ class AuthController extends Controller
 
 
 
-            $allRequest = $request->all();
-            $allRequest["password"] = Hash::make($request->password);
-            $user = User::create($allRequest);
-            return response()->json(["hey" => $allRequest]);
-            // return response()->json(["hey"=>"what?"]);
+            // $allRequest = $request->all();
+            // $allRequest["password"] = Hash::make($request->password);
+            // $user = User::create($allRequest);
+ 
 
 
-            // $user = User::create(array_merge(
-            //             $validator->validated(),
-            //             ['password' => bcrypt($request->password)]
-            //         ));
-
+            $user = User::create(array_merge(
+                        $validator->validated(),
+                        ['password' => bcrypt($request->password)]
+                    ));
+            
             return response()->json([
                 'message' => 'User successfully registered',
                 'user' => $user
