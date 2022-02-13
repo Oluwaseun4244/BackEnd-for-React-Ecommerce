@@ -15,7 +15,7 @@
             @csrf
             <label for="">Product Name</label><br>
             <input type="text" name="product_name" required><br>
-            <label for="">Product Price</label><br>
+            <label for="">Product Price</label><br><br>
             <input type="number" name="price" required><br>
             <label for="">Product Old Price</label><br>
             <input type="number" name="product_old_price" required><br>
